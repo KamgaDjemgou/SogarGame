@@ -30,11 +30,3 @@ InterfaceAccueil* initializeAccueil(){
 
     return ihmAccueil;
 }
-
-void on_quitButton_clicked(){
- gtk_main_quit();
-}
-
-void on_playButton_clicked(){
-}
-

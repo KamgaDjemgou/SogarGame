@@ -15,7 +15,4 @@ typedef struct _InterfaceAccueil
 }InterfaceAccueil;
 
 InterfaceAccueil* initializeAccueil();
-void on_playButton_clicked();
-void on_quitButton_clicked();
-
 #endif

@@ -42,6 +42,8 @@
 		<Unit filename="./src/GameManager.h"/>
 		<Unit filename="./src/InterfaceAccueil.c"/>
 		<Unit filename="./src/InterfaceAccueil.h"/>
+		<Unit filename="./src/InterfaceJouer.c"/>
+		<Unit filename="./src/InterfaceJouer.h"/>
 		<Extensions>
 			<code_completion />
 			<debugger />

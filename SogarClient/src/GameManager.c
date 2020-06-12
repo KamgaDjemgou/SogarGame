@@ -32,6 +32,18 @@ void initStyle(){
   g_object_unref (provider);
 }
 
+void on_playButton_clicked(){
+ gtk_widget_hide(gameManager->pageAccueil->window);
+
+ gameManager->pageJouer = initializeJouer();
+ gtk_widget_show_all(gameManager->pageJouer->window);
+}
+
+void on_quit(){
+ gtk_main_quit();
+}
+
+
 void startGame(){
  initGTK();
  initStyle();

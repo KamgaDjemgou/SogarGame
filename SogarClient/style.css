@@ -1,5 +1,6 @@
 window{
     background-color: #DDD;
+    /*color: orange;*/
     font-weight: bold;
     font-family: DejaVu Sans;
     font-size: 20px;
@@ -17,6 +18,10 @@ window{
 }
 
 #grille{
-	background-color: blue;
+	/*background-color: orange;*/
 	padding: 10px 10px 10px 10px;
+}
+
+#button{
+	color: red;
 }
