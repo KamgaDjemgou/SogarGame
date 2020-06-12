@@ -1,0 +1,22 @@
+window{
+    background-color: #DDD;
+    font-weight: bold;
+    font-family: DejaVu Sans;
+    font-size: 20px;
+}
+#titleGame{
+	color: blue;
+}
+
+#quitButton{
+	color: red;
+}
+
+#playButton{
+	color: green;
+}
+
+#grille{
+	background-color: blue;
+	padding: 10px 10px 10px 10px;
+}
