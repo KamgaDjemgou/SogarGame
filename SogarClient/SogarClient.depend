@@ -2,10 +2,15 @@
 1591964682 source:/home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/GameManager.c
 	"GameManager.h"
 
-1591974066 /home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/GameManager.h
+1592162819 /home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/GameManager.h
 	"InterfaceAccueil.h"
+	"InterfaceJouer.h"
+	"ConnexionTCP.h"
+	<pthread.h>
+	<unistd.h>
+	<string.h>
 
-1591966769 /home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/InterfaceAccueil.h
+1591980270 /home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/InterfaceAccueil.h
 	<gtk/gtk.h>
 
 1546476252 /usr/include/gtk-3.0/gtk/gtk.h
@@ -2896,9 +2901,27 @@
 
 1546477380 /usr/include/gtk-3.0/gtk/gtk-autocleanups.h
 
-1591967012 source:/home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/InterfaceAccueil.c
+1591980284 source:/home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/InterfaceAccueil.c
 	"InterfaceAccueil.h"
 
 1591964584 source:/home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/main.c
 	"GameManager.h"
+
+1592162539 /home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/InterfaceJouer.h
+	<gtk/gtk.h>
+
+1591451160 /home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/ConnexionTCP.h
+	<stdio.h>
+	<stdlib.h>
+	<sys/socket.h>
+	<sys/types.h>
+	<string.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+
+1591242450 source:/home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/ConnexionTCP.c
+	"ConnexionTCP.h"
+
+1592162481 source:/home/kamgadjemgou/Bureau/SogarGame/SogarClient/src/InterfaceJouer.c
+	"InterfaceJouer.h"
 

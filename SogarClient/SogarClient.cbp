@@ -35,15 +35,25 @@
 		<Linker>
 			<Add option="`pkg-config gtk+-2.0 --libs`" />
 		</Linker>
-		<Unit filename="./src/main.c">
+		<Unit filename="src/ConnexionTCP.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="./src/GameManager.c"/>
-		<Unit filename="./src/GameManager.h"/>
-		<Unit filename="./src/InterfaceAccueil.c"/>
-		<Unit filename="./src/InterfaceAccueil.h"/>
-		<Unit filename="./src/InterfaceJouer.c"/>
-		<Unit filename="./src/InterfaceJouer.h"/>
+		<Unit filename="src/ConnexionTCP.h" />
+		<Unit filename="src/GameManager.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/GameManager.h" />
+		<Unit filename="src/InterfaceAccueil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/InterfaceAccueil.h" />
+		<Unit filename="src/InterfaceJouer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/InterfaceJouer.h" />
+		<Unit filename="src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<debugger />
