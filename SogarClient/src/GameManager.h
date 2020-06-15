@@ -15,6 +15,11 @@ typedef struct _GameManager
 	GtkWidget* dialog;
 	int socket;
 	char pseudo[TAILLE];
+	int score;
+
+	int tour;
+	GtkWidget* firstButton;
+
 
 }GameManager;
 GameManager* gameManager;
@@ -27,5 +32,9 @@ void on_quit();
 void startGame();
 void afficherErreur(GtkWidget* parent, const char* message);
 void* communicateWithServer(void* arg);
+void getPosButton(GtkWidget* button, int* x, int* y);
+void insertImages();
+void changeImage(GtkWidget* button);
+void saveGrille(gchar* grilleMessage);
 
 #endif

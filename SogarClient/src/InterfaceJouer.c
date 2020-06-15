@@ -30,32 +30,10 @@ InterfaceJouer* initializeJouer(){
     gtk_widget_set_name(ihmJouer->monPseudo, "tempsValeur");
 
 
-    insertImages(ihmJouer);
-
     gtk_builder_connect_signals(builder, NULL);
     //gtk_signal_connect(G_OBJECT(ihmJouer->quitButton), "clicked", on_quitButton_clicked, NULL);
 
     g_object_unref(builder);
 
     return ihmJouer;
-}
-
-void insertImages(InterfaceJouer* ihmJouer){
-    GtkWidget* button;
-    GtkWidget*image;
-
-    for (int i = 0; i < TAILLE_GRILLE; ++i)
-    {
-        for (int j = 0; j < TAILLE_GRILLE; ++j)
-        {
-            button = gtk_button_new();
-            image = gtk_image_new_from_file("resources/inconnu.png");
-
-            gtk_button_set_image(GTK_BUTTON(button), image);
-            gtk_widget_set_name(button, "button");
-            gtk_grid_attach(GTK_GRID(ihmJouer->grille), button, i, j, 1, 1);
-            ihmJouer->imagesBoutons[i][j] = button;
-        }
-    }
-
 }

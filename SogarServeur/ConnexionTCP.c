@@ -106,16 +106,99 @@ void loopServeur()
             {
                 //On n'a plus besoin du socket du serveur 
                 close(serveur->socketServer);
+                generateGrille(serveur->grille);
 
-                //On envoie les pseudo de l'adversaire aux joueurs
-                envoyerMessage(serveur->joueur1.socket, serveur->joueur2.pseudo);
-                envoyerMessage(serveur->joueur2.socket, serveur->joueur1.pseudo);
+                //Le fils va se charger de la communication avec le premier joueur
+                //On utilisera un thread pour la communication avec le second joueur
+                pthread_t thread;
+                pthread_create(&thread, NULL, comminicateWithSecond, NULL);
+
+                char buffer[TAILLE];
+                bzero(buffer, TAILLE);
+                strcpy(buffer, serveur->joueur2.pseudo);
+                strcat(buffer, ":");
+                strcat(buffer, serveur->grille);
+                envoyerMessage(serveur->joueur1.socket, buffer);
+                printf("%s\n",buffer);
+                while(1){
+                    bzero(buffer, TAILLE);
+                    //On recoit le message venant du client
+                    recv(serveur->joueur1.socket, buffer, TAILLE, 0);
+
+                    if (strcmp(buffer, QUIT))
+                    {
+                        printf("[+]Le joueur %s vient de quitter le jeu.\n", 
+                            serveur->joueur1.pseudo);
+                        break;
+                    }
+                }
+                
             }
 
         }
             
     }
 
+}
+
+//Gestion de la communication avec le second joueur
+void* comminicateWithSecond(void* arg){
+    char buffer[TAILLE];
+    bzero(buffer, TAILLE);
+    strcpy(buffer, serveur->joueur1.pseudo);
+    strcat(buffer, ":");
+    strcat(buffer, serveur->grille);
+    envoyerMessage(serveur->joueur2.socket, buffer);
+    printf("%s\n",buffer);
+    while(1){
+        bzero(buffer, TAILLE);
+        //On recoit le message venant du client
+        recv(serveur->joueur2.socket, buffer, TAILLE, 0);
+
+        if (strcmp(buffer, QUIT))
+        {
+            printf("[+]Le joueur %s vient de quitter le jeu.\n", serveur->joueur2.pseudo);
+            break;
+        }
+    }
+}
+
+//Méthode pour générer la grille pour les joueurs automatiquement
+void generateGrille(char* message){
+    int grille[TAILLE_GRILLE][TAILLE_GRILLE] = {0};
+    int x, y;
+    int tour = 0;
+    for (int i = 1; i <= TAILLE_GRILLE*TAILLE_GRILLE/2; ++i)
+    {
+        while(tour != 2)
+        {
+            x = rand()%TAILLE_GRILLE;
+            y = rand()%TAILLE_GRILLE;
+            if (grille[x][y] == 0)
+            {
+                grille[x][y] = i;
+                tour++;
+            } 
+        }
+
+        tour = 0;
+
+    }
+
+    bzero(message, TAILLE);
+    char tochar[10];
+    for (int i = 0; i < TAILLE_GRILLE; ++i)
+    {
+        for (int j = 0; j < TAILLE_GRILLE; ++j)
+        {
+            
+            bzero(tochar, 10);
+            sprintf(tochar, "%d", grille[i][j]);
+
+            strcat(message, tochar);
+            strcat(message, " ");
+        }
+    }
 }
 
 

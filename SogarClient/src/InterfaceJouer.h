@@ -10,7 +10,7 @@ typedef struct _InterfaceJouer
 	GtkWidget* window;
 	GtkWidget* grille;
 	GtkWidget*  imagesBoutons[TAILLE_GRILLE][TAILLE_GRILLE];
-	GString imagesPaths[TAILLE_GRILLE][TAILLE_GRILLE];
+	gchar* imagesPaths[TAILLE_GRILLE][TAILLE_GRILLE];
 	GtkWidget* tempsLabel;
 	GtkWidget* tempsValeur;
 	GtkWidget* monPseudo;
@@ -21,6 +21,5 @@ typedef struct _InterfaceJouer
 }InterfaceJouer;
 
 InterfaceJouer* initializeJouer();
-void insertImages(InterfaceJouer* ihmJouer);
 
 #endif

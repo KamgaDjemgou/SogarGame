@@ -48,7 +48,10 @@ void on_playButton_clicked(){
     return;
  }
 
+ gameManager->tour = 0;
+ gameManager->score = 0;
  gameManager->pageJouer = initializeJouer();
+ insertImages();
  bzero(gameManager->pseudo, TAILLE);
  strcpy(gameManager->pseudo, pseudoSaisi);
  gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->monPseudo), pseudoSaisi);
@@ -72,17 +75,36 @@ void on_playButton_clicked(){
 
 void* communicateWithServer(void* arg){
      envoyerMessage(gameManager->socket, gameManager->pseudo);
-
      char buffer[TAILLE];
      bzero(buffer, TAILLE);
+
      if(recv(gameManager->socket, buffer, TAILLE, 0) > 0){
+        gchar** split;
+        split = g_strsplit(buffer, ":", -1);
         gtk_widget_destroy(gameManager->dialog);
 
-        gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->pseudoAdv), buffer);
+        gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->pseudoAdv), split[0]);
         gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->scoreAdv), "0");
+        saveGrille(split[1]);
      }
 }
+void saveGrille(gchar* grilleMessage){
+  gchar** split;
+  split = g_strsplit(grilleMessage, " ",-1);
+  int x, y;
+  for (int i = 0; i < TAILLE_GRILLE*TAILLE_GRILLE; ++i)
+  {
+    x = i/TAILLE_GRILLE;
+    y = i%TAILLE_GRILLE;
 
+    gchar path[30];
+    bzero(path, 30);
+    sprintf(path, "resources/%s.png",split[i]);
+
+    gameManager->pageJouer->imagesPaths[x][y] = (char*)malloc(30*sizeof(char));
+    strcpy(gameManager->pageJouer->imagesPaths[x][y], path);
+  }
+}
 void afficherErreur(GtkWidget* parent, const char* message){
     GtkWidget* dialog;
     GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -96,13 +118,94 @@ void afficherErreur(GtkWidget* parent, const char* message){
 
 void on_quit(){
   gtk_main_quit();
-  send(gameManager->socket,QUIT, strlen(TAILLE), 0);
+  send(gameManager->socket,QUIT, TAILLE, 0);
 }
-
 
 void startGame(){
  initGTK();
  initStyle();
  initGameManager();
  gtk_main();
+}
+
+//Recupérer la position du bouton dans la grille
+void getPosButton(GtkWidget* button, int* x, int* y){
+    for (int i = 0; i < TAILLE_GRILLE; ++i)
+    {
+        for (int j = 0; j < TAILLE_GRILLE; ++j)
+        {
+            if(gameManager->pageJouer->imagesBoutons[i][j] == button){
+                *x = i;
+                *y = j;
+                return;
+            }
+        }
+    }
+
+}
+
+//Insérer les images par défaut
+void insertImages(){
+    GtkWidget* button;
+    GtkWidget*image;
+
+    for (int i = 0; i < TAILLE_GRILLE; ++i)
+    {
+        for (int j = 0; j < TAILLE_GRILLE; ++j)
+        {
+            button = gtk_button_new();
+            image = gtk_image_new_from_file("resources/inconnu.png");
+
+            gtk_button_set_image(GTK_BUTTON(button), image);
+            gtk_widget_set_name(button, "button");
+            gtk_grid_attach(GTK_GRID(gameManager->pageJouer->grille), button, i, j, 1, 1);
+            g_signal_connect(button, "clicked",G_CALLBACK (changeImage),button);
+            gameManager->pageJouer->imagesBoutons[i][j] = button;
+        }
+    }
+}
+
+//Changer une image
+void changeImage(GtkWidget* button){
+    int i, j;
+    GtkWidget*image;
+
+    getPosButton(button, &i, &j);
+    image = gtk_image_new_from_file(gameManager->pageJouer->imagesPaths[i][j]);
+    gtk_button_set_image(GTK_BUTTON(button), image);
+    gtk_widget_set_sensitive(button, FALSE);
+
+    if(gameManager->tour == 0){
+        gameManager->firstButton = button;
+    }
+    gameManager->tour++;
+
+    if(gameManager->tour == 2){
+        int i1, j1;
+        getPosButton(gameManager->firstButton, &i1, &j1);
+
+        if(strcmp(gameManager->pageJouer->imagesPaths[i][j], gameManager->pageJouer->imagesPaths[i1][j1]) == 0){
+            image = gtk_image_new_from_file("resources/correct.png");
+            gtk_button_set_image(GTK_BUTTON(button), image);
+
+            image = gtk_image_new_from_file("resources/correct.png");
+            gtk_button_set_image(GTK_BUTTON(gameManager->firstButton), image);
+
+            char score[10];
+            gameManager->score += 2;
+            sprintf(score, "%d", gameManager->score);
+            gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->monScore), score);
+
+        }else{
+            image = gtk_image_new_from_file("resources/inconnu.png");
+            gtk_button_set_image(GTK_BUTTON(button), image);
+
+            image = gtk_image_new_from_file("resources/inconnu.png");
+            gtk_button_set_image(GTK_BUTTON(gameManager->firstButton), image);
+            gtk_widget_set_sensitive(button, TRUE);
+            gtk_widget_set_sensitive(gameManager->firstButton, TRUE);
+        }
+        gameManager->tour = 0;
+
+    }
 }
