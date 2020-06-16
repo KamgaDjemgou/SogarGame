@@ -17,6 +17,8 @@ Nous avons deux repertoires:
 
 
 Voici quelques captures d'écrans des interfaces graphiques réalisées:
+
+
 ![Image Ecran du joueur](./images/pageAccueil.png "Page d'accueil")
 ![Image Ecran du joueur](./images/page1.png "Saisie du nom")
 ![Image Ecran du joueur](./images/page2.png "Page du jeu")
