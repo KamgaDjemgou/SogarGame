@@ -15,8 +15,7 @@ typedef struct _InterfaceJouer
 	GtkWidget* tempsValeur;
 	GtkWidget* monPseudo;
 	GtkWidget* monScore;
-	GtkWidget* pseudoAdv;
-	GtkWidget* scoreAdv;
+	GtkWidget* replayButton;
 
 }InterfaceJouer;
 

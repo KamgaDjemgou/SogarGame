@@ -3,7 +3,6 @@
 void initServeur()
 {
     serveur = (Serveur*)malloc(sizeof(Serveur));
-    serveur->tour = 0;
 
     struct sockaddr_in serverAddr;
     serveur->socketServer = socket(AF_INET, SOCK_STREAM, 0);
@@ -33,36 +32,8 @@ void initServeur()
 
 }
 
-void connexionJoueurs()
-{
-    int newSocket;
-    struct sockaddr_in newAddr;
-    socklen_t addr_size;
-
-    newSocket = accept(serveur->socketServer, (struct sockaddr*)&newAddr,&addr_size);
-    if(newSocket < 0)
-    {
-        printf("[-]Impossible de connecter le premier joueur\n");
-    }else{
-        serveur->joueur1.socket = newSocket;
-        bzero(serveur->joueur1.pseudo, TAILLE);
-        recv(newSocket, serveur->joueur1.pseudo, TAILLE, 0);
-
-        printf("[+]Le joueur %s vient de se connecter.\n",
-                serveur->joueur1.pseudo);
-
-    }
-
-    
-    envoyerMessage(serveur->joueur1.socket, serveur->joueur2.pseudo);
-    envoyerMessage(serveur->joueur2.socket, serveur->joueur1.pseudo);
-    
-}
-
 void loopServeur()
 {
-    // char buffer[TAILLE];
-    // int tour = 0;
     int newSocket;
     struct sockaddr_in newAddr;
     socklen_t addr_size;
@@ -70,97 +41,45 @@ void loopServeur()
     while(1){
 
         newSocket = accept(serveur->socketServer, (struct sockaddr*)&newAddr,&addr_size);
-        if(newSocket >= 0){
-            //Si le premier joueur s'est bien connecté
-            serveur->joueur1.socket = newSocket;
-            bzero(serveur->joueur1.pseudo, TAILLE);
-            //On recoit son nom
-            recv(newSocket, serveur->joueur1.pseudo, TAILLE, 0);
-
-            printf("[+]Le joueur %s vient de se connecter.\n",
-                    serveur->joueur1.pseudo);
-
-            //Connection du second joueur
-            int found = 0;
-            do{
-                newSocket = accept(serveur->socketServer, 
-                (struct sockaddr*)&newAddr,&addr_size);
-                if(newSocket >= 0){
-                    serveur->joueur2.socket = newSocket;
-                    bzero(serveur->joueur2.pseudo, TAILLE);
-                    recv(newSocket, serveur->joueur2.pseudo, TAILLE, 0);
-
-                    printf("[+]Le joueur %s vient de se connecter.\n",
-                            serveur->joueur2.pseudo);
-                    found = 1;
-                }
-
-            }while(!found);
-
-            //Création d'un processus fils pour le jeu entre les deux joueurs
-            pid_t fils;
-            if ((fils = fork()) < 0)
-            {
-                //Envoyer un message aux clients pour signaler l'erreur
-            }else if (fils != 0)
+        if (newSocket >= 0)
+        {   
+            //Création d'un processus pour le jeu
+            pid_t fils = fork();
+            if (fils > 0)
             {
                 //On n'a plus besoin du socket du serveur 
                 close(serveur->socketServer);
-                generateGrille(serveur->grille);
+            
+                printf("[+]Un joueur vient de se connecter.\n");
 
-                //Le fils va se charger de la communication avec le premier joueur
-                //On utilisera un thread pour la communication avec le second joueur
-                pthread_t thread;
-                pthread_create(&thread, NULL, comminicateWithSecond, NULL);
 
                 char buffer[TAILLE];
-                bzero(buffer, TAILLE);
-                strcpy(buffer, serveur->joueur2.pseudo);
-                strcat(buffer, ":");
-                strcat(buffer, serveur->grille);
-                envoyerMessage(serveur->joueur1.socket, buffer);
-                printf("%s\n",buffer);
+                generateGrille(buffer);
+
+                //Envoyer la grille au joueur
+                envoyerMessage(newSocket, buffer);
                 while(1){
                     bzero(buffer, TAILLE);
-                    //On recoit le message venant du client
-                    recv(serveur->joueur1.socket, buffer, TAILLE, 0);
-
-                    if (strcmp(buffer, QUIT))
+                    if (recv(newSocket, buffer, TAILLE, 0) > 0)
                     {
-                        printf("[+]Le joueur %s vient de quitter le jeu.\n", 
-                            serveur->joueur1.pseudo);
-                        break;
+                        if (strcmp(buffer, QUIT) == 0)
+                        {
+                            printf("[+]Un joueur vient de se déconnecter.\n");
+                            break;
+                        }else if (strcmp(buffer, REPLAY) == 0)
+                        {
+                            generateGrille(buffer);
+                            //Envoyer la grille au joueur
+                            envoyerMessage(newSocket, buffer);
+                        }
                     }
                 }
-                
             }
-
         }
+        
             
     }
 
-}
-
-//Gestion de la communication avec le second joueur
-void* comminicateWithSecond(void* arg){
-    char buffer[TAILLE];
-    bzero(buffer, TAILLE);
-    strcpy(buffer, serveur->joueur1.pseudo);
-    strcat(buffer, ":");
-    strcat(buffer, serveur->grille);
-    envoyerMessage(serveur->joueur2.socket, buffer);
-    printf("%s\n",buffer);
-    while(1){
-        bzero(buffer, TAILLE);
-        //On recoit le message venant du client
-        recv(serveur->joueur2.socket, buffer, TAILLE, 0);
-
-        if (strcmp(buffer, QUIT))
-        {
-            printf("[+]Le joueur %s vient de quitter le jeu.\n", serveur->joueur2.pseudo);
-            break;
-        }
-    }
 }
 
 //Méthode pour générer la grille pour les joueurs automatiquement
@@ -168,6 +87,9 @@ void generateGrille(char* message){
     int grille[TAILLE_GRILLE][TAILLE_GRILLE] = {0};
     int x, y;
     int tour = 0;
+    time_t t;
+    srand((unsigned)time(&t));
+
     for (int i = 1; i <= TAILLE_GRILLE*TAILLE_GRILLE/2; ++i)
     {
         while(tour != 2)
@@ -186,6 +108,8 @@ void generateGrille(char* message){
     }
 
     bzero(message, TAILLE);
+    strcat(message, TIMING);
+    strcat(message, ":");
     char tochar[10];
     for (int i = 0; i < TAILLE_GRILLE; ++i)
     {
@@ -202,9 +126,9 @@ void generateGrille(char* message){
 }
 
 
-void startServeur(){
+void startServeur(const char* timing){
+    TIMING = timing;
     initServeur();
-    // connexionJoueurs();
     loopServeur();
 }
 

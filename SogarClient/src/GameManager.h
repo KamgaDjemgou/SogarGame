@@ -8,6 +8,9 @@
 #include <unistd.h>
 #include <string.h>
 
+#define REPLAY "REPLAY"
+#define QUIT ":exit"
+
 typedef struct _GameManager
 {
 	InterfaceAccueil* pageAccueil;
@@ -18,6 +21,7 @@ typedef struct _GameManager
 	int score;
 
 	int tour;
+	int timing;
 	GtkWidget* firstButton;
 
 
@@ -36,5 +40,7 @@ void getPosButton(GtkWidget* button, int* x, int* y);
 void insertImages();
 void changeImage(GtkWidget* button);
 void saveGrille(gchar* grilleMessage);
-
+void gererTemps();
+void onReplay();
+void resetImages();
 #endif

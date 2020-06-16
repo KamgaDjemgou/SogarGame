@@ -48,46 +48,73 @@ void on_playButton_clicked(){
     return;
  }
 
- gameManager->tour = 0;
- gameManager->score = 0;
  gameManager->pageJouer = initializeJouer();
- insertImages();
  bzero(gameManager->pseudo, TAILLE);
  strcpy(gameManager->pseudo, pseudoSaisi);
  gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->monPseudo), pseudoSaisi);
+ insertImages();
 
  gtk_widget_hide(gameManager->pageAccueil->window);
  gtk_widget_show_all(gameManager->pageJouer->window);
 
- GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT|GTK_DIALOG_MODAL;
- gameManager->dialog = gtk_message_dialog_new (GTK_WINDOW(gameManager->pageJouer->window),
- flags,
- GTK_MESSAGE_ERROR,GTK_BUTTONS_CANCEL,"En attente de votre adversaire ...", NULL);
- gtk_window_set_position(GTK_WINDOW(gameManager->dialog), GTK_WIN_POS_CENTER_ON_PARENT);
- g_signal_connect(gameManager->dialog, "response",G_CALLBACK (on_quit),NULL);
-
- gtk_widget_show_all(gameManager->dialog);
-
- //Communication avec le serveurs
+ //Communication avec le serveur
  pthread_t thread;
  pthread_create(&thread, NULL,communicateWithServer,NULL);
 }
 
 void* communicateWithServer(void* arg){
-     envoyerMessage(gameManager->socket, gameManager->pseudo);
      char buffer[TAILLE];
      bzero(buffer, TAILLE);
 
      if(recv(gameManager->socket, buffer, TAILLE, 0) > 0){
         gchar** split;
         split = g_strsplit(buffer, ":", -1);
-        gtk_widget_destroy(gameManager->dialog);
 
-        gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->pseudoAdv), split[0]);
-        gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->scoreAdv), "0");
+        gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->tempsValeur), split[0]);
+        gameManager->timing = atoi(split[0]);
+
         saveGrille(split[1]);
+
+        gtk_widget_set_sensitive(gameManager->pageJouer->replayButton, FALSE);
+        
+        
+        gameManager->tour = 0;
+        gameManager->score = 0;
+        g_timeout_add_seconds(30, (GSourceFunc)gererTemps, NULL);
+        gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->monScore), "0");
      }
 }
+
+//Fonction pour la gestion du timing: A la fin de chaque 1/2 minute
+void gererTemps(){
+    if(gameManager->timing > 0){
+      gameManager->timing--;
+      char time[10];
+      bzero(time, 10);
+      char scoreActu[10];
+      bzero(scoreActu, 10);
+
+      sprintf(time, "%d", gameManager->timing);
+      gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->tempsValeur), time);
+
+      if(gameManager->timing == 0){
+
+          for (int i = 0; i < TAILLE_GRILLE; ++i)
+          {
+            for (int j = 0; j < TAILLE_GRILLE; ++j)
+            {
+              gtk_widget_set_sensitive(gameManager->pageJouer->imagesBoutons[i][j], FALSE);
+            }
+          }
+
+          afficherErreur(gameManager->pageJouer->window, "Fin de la partie");
+          gtk_widget_set_sensitive(gameManager->pageJouer->replayButton, TRUE);
+      }
+
+    }
+}
+
+//Enregistrer la grille
 void saveGrille(gchar* grilleMessage){
   gchar** split;
   split = g_strsplit(grilleMessage, " ",-1);
@@ -107,7 +134,7 @@ void saveGrille(gchar* grilleMessage){
 }
 void afficherErreur(GtkWidget* parent, const char* message){
     GtkWidget* dialog;
-    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+    GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT|GTK_WIN_POS_CENTER_ALWAYS;
     dialog = gtk_message_dialog_new (GTK_WINDOW(parent),
     flags,
     GTK_MESSAGE_ERROR,GTK_BUTTONS_CLOSE,message, NULL);
@@ -165,6 +192,23 @@ void insertImages(){
     }
 }
 
+void resetImages(){
+  GtkWidget*image;
+  GtkWidget* button;
+    for (int i = 0; i < TAILLE_GRILLE; ++i)
+    {
+        for (int j = 0; j < TAILLE_GRILLE; ++j)
+        {
+            button = gameManager->pageJouer->imagesBoutons[i][j];
+            image = gtk_image_new_from_file("resources/inconnu.png");
+
+            gtk_button_set_image(GTK_BUTTON(button), image);
+            gtk_widget_set_sensitive(button, TRUE);
+        }
+    }
+
+}
+
 //Changer une image
 void changeImage(GtkWidget* button){
     int i, j;
@@ -195,6 +239,9 @@ void changeImage(GtkWidget* button){
             gameManager->score += 2;
             sprintf(score, "%d", gameManager->score);
             gtk_label_set_text(GTK_LABEL(gameManager->pageJouer->monScore), score);
+            if(gameManager->score == 32){
+                gtk_widget_set_sensitive(gameManager->pageJouer->replayButton, TRUE);
+            }
 
         }else{
             image = gtk_image_new_from_file("resources/inconnu.png");
@@ -208,4 +255,11 @@ void changeImage(GtkWidget* button){
         gameManager->tour = 0;
 
     }
+}
+
+//Lorsque le joueur veut rejouer
+void onReplay(){
+  resetImages();
+  envoyerMessage(gameManager->socket, REPLAY);
+  communicateWithServer(NULL);
 }

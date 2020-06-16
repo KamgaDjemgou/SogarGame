@@ -7,7 +7,7 @@
     <property name="title" translatable="yes">SOGAR GAME-Jeu de concentration</property>
     <property name="resizable">False</property>
     <property name="default_width">800</property>
-    <property name="default_height">900</property>
+    <property name="default_height">800</property>
     <signal name="destroy" handler="on_quit" swapped="no"/>
     <child>
       <placeholder/>
@@ -136,22 +136,6 @@
           </object>
           <packing>
             <property name="x">10</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="replayButton">
-            <property name="label" translatable="yes">Rejouer</property>
-            <property name="width_request">200</property>
-            <property name="height_request">50</property>
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="onReplay" swapped="no"/>
-          </object>
-          <packing>
-            <property name="x">10</property>
-            <property name="y">840</property>
           </packing>
         </child>
       </object>
